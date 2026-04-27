@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-booking
+      author: you
+      changes:
+        - createTable:
+            tableName: booking
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: user_id
+                  type: bigint
+
+              - column:
+                  name: listing_id
+                  type: bigint
+
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
