@@ -1,4 +1,4 @@
-package pet.airbooking.scheduler;
+package pet.airbooking.scheduler.outbox;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
