@@ -99,12 +99,13 @@ public class BookingServiceImpl implements BookingService {
                     String.format("Booking with id = %d not found", id)
             );
         }
+        repository.deleteById(id);
+
         outboxService.saveEvent(
                 id,
                 EventType.BOOKING_CANCELLED,
                 new BookingCancelledEvent(id)
         );
-        repository.deleteById(id);
     }
 
     private BookingEntity getBookingById(Long id) {
