@@ -73,6 +73,6 @@ public class BookingServiceImpl implements BookingService {
 
     private BookingEntity getBookingById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Booking with id = {%d}not found", id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Booking with id = %d not found", id)));
     }
 }
