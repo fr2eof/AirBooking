@@ -9,8 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pet.airbooking.core.entity.BookingEntity;
 import pet.airbooking.core.exception.EntityNotFoundException;
 import pet.airbooking.core.model.BookingStatus;
+import pet.airbooking.core.model.EventType;
 import pet.airbooking.core.repository.BookingJpaRepository;
 import pet.airbooking.core.service.impl.BookingServiceImpl;
+import pet.airbooking.core.service.impl.OutboxServiceImpl;
 import pet.airbooking.io.dto.BookingEntityDTO;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
@@ -19,8 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,9 @@ class BookingServiceImplTest {
 
     @Mock
     private BookingMapper mapper;
+
+    @Mock
+    private OutboxServiceImpl outboxService;
 
     @InjectMocks
     private BookingServiceImpl service;
@@ -63,6 +67,12 @@ class BookingServiceImplTest {
                             entity.getListingId().equals(listingId) &&
                             entity.getStatus() == BookingStatus.PENDING
             ));
+
+            verify(outboxService).saveEvent(
+                    anyLong(),
+                    eq(EventType.BOOKING_CREATED),
+                    any()
+            );
         }
         @Test
         void shouldReturnIdFromSavedEntity() {
@@ -81,6 +91,12 @@ class BookingServiceImplTest {
 
             // Then
             assertThat(actualResponse.getBookingId()).isEqualTo(99L);
+
+            verify(outboxService).saveEvent(
+                    anyLong(),
+                    eq(EventType.BOOKING_CREATED),
+                    any()
+            );
         }
     }
 
@@ -134,6 +150,12 @@ class BookingServiceImplTest {
 
             // Then
             verify(repository).deleteById(id);
+
+            verify(outboxService).saveEvent(
+                    eq(id),
+                    eq(EventType.BOOKING_CANCELLED),
+                    any()
+            );
         }
 
         @Test
@@ -148,6 +170,7 @@ class BookingServiceImplTest {
                     .hasMessage("Booking with id = 1 not found");
         }
     }
+
     @Nested
     class Confirm {
 
@@ -175,6 +198,12 @@ class BookingServiceImplTest {
 
             verify(entity).confirm();
             verify(repository).save(entity);
+
+            verify(outboxService).saveEvent(
+                    eq(id),
+                    eq(EventType.BOOKING_CONFIRMED),
+                    any()
+            );
         }
 
         @Test
@@ -189,6 +218,7 @@ class BookingServiceImplTest {
                     .isInstanceOf(EntityNotFoundException.class);
         }
     }
+
     @Nested
     class Cancel {
 
@@ -216,6 +246,12 @@ class BookingServiceImplTest {
 
             verify(entity).cancel();
             verify(repository).save(entity);
+
+            verify(outboxService).saveEvent(
+                    eq(id),
+                    eq(EventType.BOOKING_CANCELLED),
+                    any()
+            );
         }
 
         @Test

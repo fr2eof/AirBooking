@@ -8,9 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import pet.airbooking.core.entity.BookingEntity;
 import pet.airbooking.core.exception.EntityNotFoundException;
 import pet.airbooking.core.model.BookingStatus;
+import pet.airbooking.core.model.EventType;
 import pet.airbooking.core.repository.BookingJpaRepository;
 import pet.airbooking.core.service.BookingService;
 import pet.airbooking.io.dto.BookingEntityDTO;
+import pet.airbooking.io.dto.event.BookingCancelledEvent;
+import pet.airbooking.io.dto.event.BookingConfirmedEvent;
+import pet.airbooking.io.dto.event.BookingCreatedEvent;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
 
@@ -20,14 +24,25 @@ import pet.airbooking.io.mapper.BookingMapper;
 public class BookingServiceImpl implements BookingService {
     private final BookingJpaRepository repository;
     private final BookingMapper mapper;
+    private final OutboxServiceImpl outboxService;
 
     @Override
     @Transactional
     public CreateBookingResponse create(Long userId, Long listingId) {
         BookingEntity entity = new BookingEntity(userId, listingId);
         entity.setStatus(BookingStatus.PENDING);
+        BookingEntity saved = repository.save(entity);
 
-        return new CreateBookingResponse(repository.save(entity).getId());
+        outboxService.saveEvent(
+                saved.getId(),
+                EventType.BOOKING_CREATED,
+                new BookingCreatedEvent(
+                        saved.getId(),
+                        saved.getUserId(),
+                        saved.getListingId()
+                )
+        );
+        return new CreateBookingResponse(saved.getId());
     }
 
     @Override
@@ -49,7 +64,15 @@ public class BookingServiceImpl implements BookingService {
     public BookingEntityDTO confirm(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.confirm();
-        return mapper.toDto(repository.save(entity));
+        BookingEntity saved = repository.save(entity);
+
+        outboxService.saveEvent(
+                saved.getId(),
+                EventType.BOOKING_CONFIRMED,
+                new BookingConfirmedEvent(saved.getId())
+        );
+
+        return mapper.toDto(saved);
     }
 
     @Override
@@ -57,7 +80,15 @@ public class BookingServiceImpl implements BookingService {
     public BookingEntityDTO cancel(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.cancel();
-        return mapper.toDto(repository.save(entity));
+        BookingEntity saved = repository.save(entity);
+
+        outboxService.saveEvent(
+                saved.getId(),
+                EventType.BOOKING_CANCELLED,
+                new BookingCancelledEvent(saved.getId())
+        );
+
+        return mapper.toDto(saved);
     }
 
     @Override
@@ -69,6 +100,12 @@ public class BookingServiceImpl implements BookingService {
             );
         }
         repository.deleteById(id);
+
+        outboxService.saveEvent(
+                id,
+                EventType.BOOKING_CANCELLED,
+                new BookingCancelledEvent(id)
+        );
     }
 
     private BookingEntity getBookingById(Long id) {

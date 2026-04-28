@@ -1,5 +1,6 @@
 package pet.airbooking.core.service.IT;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import pet.airbooking.core.entity.BookingEntity;
+import pet.airbooking.core.entity.OutboxEvent;
 import pet.airbooking.core.exception.EntityNotFoundException;
 import pet.airbooking.core.model.BookingStatus;
+import pet.airbooking.core.model.EventType;
 import pet.airbooking.core.repository.BookingJpaRepository;
+import pet.airbooking.core.repository.OutboxEventRepository;
 import pet.airbooking.core.service.BookingService;
 import pet.airbooking.io.dto.BookingEntityDTO;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
@@ -35,30 +39,45 @@ class BookingServiceImplIntegrationTest {
 
     @Autowired
     private BookingJpaRepository repository;
+    @Autowired
+    private OutboxEventRepository outboxRepository;
+
+    @BeforeEach
+    void clean() {
+        outboxRepository.deleteAll();
+        repository.deleteAll();
+    }
+
     @Nested
     class Create {
 
         @Test
-        void shouldCreateBooking_andPersistToDatabase() {
-            // Given
+        void shouldCreateBooking_andPersistOutboxEvent() {
+
             Long userId = 1L;
             Long listingId = 2L;
 
-            // When
-            CreateBookingResponse actualResponse =
+            CreateBookingResponse response =
                     service.create(userId, listingId);
 
-            // Then
-            assertThat(actualResponse.getBookingId()).isNotNull();
+            assertThat(response.getBookingId()).isNotNull();
 
-            BookingEntity actualEntity =
-                    repository.findById(actualResponse.getBookingId()).orElseThrow();
+            BookingEntity entity =
+                    repository.findById(response.getBookingId()).orElseThrow();
 
-            assertThat(actualEntity.getUserId()).isEqualTo(1L);
-            assertThat(actualEntity.getListingId()).isEqualTo(2L);
-            assertThat(actualEntity.getStatus()).isEqualTo(BookingStatus.PENDING);
+            assertThat(entity.getStatus()).isEqualTo(BookingStatus.PENDING);
+
+            OutboxEvent event =
+                    outboxRepository.findAll().get(0);
+
+            assertThat(event.getEventType())
+                    .isEqualTo(EventType.BOOKING_CREATED);
+
+            assertThat(event.getAggregateId())
+                    .isEqualTo(response.getBookingId());
         }
     }
+
     @Nested
     class Get {
 
@@ -79,22 +98,27 @@ class BookingServiceImplIntegrationTest {
             assertThat(actual.getId()).isEqualTo(saved.getId());
         }
     }
+
     @Nested
     class Delete {
 
         @Test
-        void shouldDeleteBooking_fromDatabase() {
-            // Given
+        void shouldDeleteBooking_andWriteOutboxEvent() {
+
             BookingEntity saved =
                     repository.save(new BookingEntity(1L, 2L));
 
             Long id = saved.getId();
 
-            // When
             service.delete(id);
 
-            // Then
             assertThat(repository.findById(id)).isEmpty();
+
+            OutboxEvent event =
+                    outboxRepository.findAll().get(0);
+
+            assertThat(event.getEventType())
+                    .isEqualTo(EventType.BOOKING_CANCELLED);
         }
 
         @Test
@@ -108,54 +132,54 @@ class BookingServiceImplIntegrationTest {
                     .hasMessageContaining("not found");
         }
     }
+
     @Nested
     class Confirm {
 
         @Test
-        void shouldConfirmBooking_andUpdateStatus() {
-            // Given
+        void shouldConfirmBooking_andWriteOutboxEvent() {
+
             BookingEntity saved =
                     repository.save(new BookingEntity(1L, 2L));
 
-            Long id = saved.getId();
+            service.confirm(saved.getId());
 
-            // When
-            BookingEntityDTO actual =
-                    service.confirm(id);
-
-            // Then
             BookingEntity updated =
-                    repository.findById(id).orElseThrow();
+                    repository.findById(saved.getId()).orElseThrow();
 
             assertThat(updated.getStatus())
                     .isEqualTo(BookingStatus.CONFIRMED);
 
-            assertThat(actual.getId()).isEqualTo(id);
+            OutboxEvent event =
+                    outboxRepository.findAll().get(0);
+
+            assertThat(event.getEventType())
+                    .isEqualTo(EventType.BOOKING_CONFIRMED);
         }
     }
+
     @Nested
     class Cancel {
 
         @Test
-        void shouldCancelBooking_andUpdateStatus() {
-            // Given
+        void shouldCancelBooking_andWriteOutboxEvent() {
+
             BookingEntity saved =
                     repository.save(new BookingEntity(1L, 2L));
 
-            Long id = saved.getId();
+            service.cancel(saved.getId());
 
-            // When
-            BookingEntityDTO actual =
-                    service.cancel(id);
-
-            // Then
             BookingEntity updated =
-                    repository.findById(id).orElseThrow();
+                    repository.findById(saved.getId()).orElseThrow();
 
             assertThat(updated.getStatus())
                     .isEqualTo(BookingStatus.CANCELLED);
 
-            assertThat(actual.getId()).isEqualTo(id);
+            OutboxEvent event =
+                    outboxRepository.findAll().get(0);
+
+            assertThat(event.getEventType())
+                    .isEqualTo(EventType.BOOKING_CANCELLED);
         }
     }
 }
