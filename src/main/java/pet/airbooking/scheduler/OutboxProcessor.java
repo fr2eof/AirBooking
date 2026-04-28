@@ -1,0 +1,41 @@
+package pet.airbooking.scheduler;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import pet.airbooking.core.entity.OutboxEvent;
+import pet.airbooking.core.model.OutboxStatus;
+import pet.airbooking.core.repository.OutboxEventRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class OutboxProcessor {
+
+    private final OutboxEventRepository repository;
+
+    @Scheduled(fixedDelay = 5000)
+    @Transactional
+    public void process() {
+
+        List<OutboxEvent> events =
+                repository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.NEW);
+
+        for (OutboxEvent event : events) {
+
+            // имитация Kafka
+            log.info("Publishing event with id {}: {} -> {}",
+                    event.getId(),
+                    event.getEventType(),
+                    event.getPayload());
+
+            event.setStatus(OutboxStatus.SENT);
+            event.setProcessedAt(LocalDateTime.now());
+        }
+    }
+}
