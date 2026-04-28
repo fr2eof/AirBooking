@@ -31,3 +31,7 @@ databaseChangeLog:
               - column:
                   name: updated_at
                   type: TIMESTAMP
+
+              - column:
+                  name: version
+                  type: int
