@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pet.airbooking.core.entity.OutboxEvent;
 import pet.airbooking.core.model.OutboxStatus;
 import pet.airbooking.core.repository.OutboxEventRepository;
+import pet.airbooking.io.messaging.impl.KafkaOutboxEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +19,9 @@ import java.util.List;
 public class OutboxProcessor {
 
     private final OutboxEventRepository repository;
+    private final KafkaOutboxEventPublisher publisher;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelayString = "${outbox.scheduler.delay}")
     @Transactional
     public void process() {
 
@@ -28,14 +30,15 @@ public class OutboxProcessor {
 
         for (OutboxEvent event : events) {
 
-            // имитация Kafka
-            log.info("Publishing event with id {}: {} -> {}",
-                    event.getId(),
-                    event.getEventType(),
-                    event.getPayload());
+            try {
+                publisher.publish(event);
 
-            event.setStatus(OutboxStatus.SENT);
-            event.setProcessedAt(LocalDateTime.now());
+                event.setStatus(OutboxStatus.SENT);
+                event.setProcessedAt(LocalDateTime.now());
+
+            } catch (Exception e) {
+                log.error("Failed to publish event {}", event.getId(), e);
+            }
         }
     }
 }
