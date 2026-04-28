@@ -1,5 +1,6 @@
 package pet.airbooking.core.repository.IT;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,11 @@ class BookingJpaRepositoryTest {
             new PostgreSQLContainer<>("postgres:17");
     @Autowired
     private BookingJpaRepository repository;
+
+    @BeforeEach
+    void clean() {
+        repository.deleteAll();
+    }
 
     @Nested
     class Save {
