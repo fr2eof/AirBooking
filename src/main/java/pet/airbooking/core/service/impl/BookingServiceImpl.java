@@ -1,6 +1,8 @@
 package pet.airbooking.core.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "bookings", key = "#id")
     public BookingEntityDTO get(Long id) {
         BookingEntity entity = getBookingById(id);
         return mapper.toDto(entity);
@@ -61,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public BookingEntityDTO confirm(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.confirm();
@@ -77,6 +81,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public BookingEntityDTO cancel(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.cancel();
@@ -93,6 +98,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException(
