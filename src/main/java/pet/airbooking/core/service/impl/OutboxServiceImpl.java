@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pet.airbooking.core.entity.OutboxEvent;
 import pet.airbooking.core.model.EventType;
+import pet.airbooking.core.model.OutboxStatus;
 import pet.airbooking.core.repository.OutboxEventRepository;
+
+import java.math.BigDecimal;
 
 
 @Service
@@ -33,5 +36,9 @@ public class OutboxServiceImpl {
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize outbox event", e);
         }
+    }
+
+    public long countFailed() {
+        return repository.countByStatus(OutboxStatus.FAILED);
     }
 }

@@ -1,6 +1,8 @@
 package pet.airbooking.core.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import pet.airbooking.io.dto.event.BookingConfirmedEvent;
 import pet.airbooking.io.dto.event.BookingCreatedEvent;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
+import pet.airbooking.io.metrics.BookingMetrics;
 
 
 @Service
@@ -25,6 +28,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingJpaRepository repository;
     private final BookingMapper mapper;
     private final OutboxServiceImpl outboxService;
+    private final BookingMetrics metrics;
+
 
     @Override
     @Transactional
@@ -42,11 +47,13 @@ public class BookingServiceImpl implements BookingService {
                         saved.getListingId()
                 )
         );
+        metrics.incrementCreated();
         return new CreateBookingResponse(saved.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "bookings", key = "#id")
     public BookingEntityDTO get(Long id) {
         BookingEntity entity = getBookingById(id);
         return mapper.toDto(entity);
@@ -61,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public BookingEntityDTO confirm(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.confirm();
@@ -71,12 +79,14 @@ public class BookingServiceImpl implements BookingService {
                 EventType.BOOKING_CONFIRMED,
                 new BookingConfirmedEvent(saved.getId())
         );
+        metrics.incrementConfirmed();
 
         return mapper.toDto(saved);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public BookingEntityDTO cancel(Long id) {
         BookingEntity entity = getBookingById(id);
         entity.cancel();
@@ -87,12 +97,14 @@ public class BookingServiceImpl implements BookingService {
                 EventType.BOOKING_CANCELLED,
                 new BookingCancelledEvent(saved.getId())
         );
+        metrics.incrementCancelled();
 
         return mapper.toDto(saved);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "bookings", key = "#id")
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException(

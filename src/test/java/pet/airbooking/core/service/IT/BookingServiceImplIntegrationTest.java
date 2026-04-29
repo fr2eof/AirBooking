@@ -10,6 +10,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import pet.airbooking.AbstractIntegrationTest;
 import pet.airbooking.core.entity.BookingEntity;
 import pet.airbooking.core.entity.OutboxEvent;
 import pet.airbooking.core.exception.EntityNotFoundException;
@@ -27,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class BookingServiceImplIntegrationTest {
+class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
 
     @Container
     @ServiceConnection

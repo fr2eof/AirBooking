@@ -3,12 +3,14 @@ package pet.airbooking.io.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import pet.airbooking.core.model.BookingStatus;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@ToString
 public class BookingEntityDTO {
 
     private Long id;

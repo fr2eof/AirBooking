@@ -16,6 +16,7 @@ import pet.airbooking.core.service.impl.OutboxServiceImpl;
 import pet.airbooking.io.dto.BookingEntityDTO;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
+import pet.airbooking.io.metrics.BookingMetrics;
 
 import java.util.Optional;
 
@@ -37,6 +38,9 @@ class BookingServiceImplTest {
 
     @Mock
     private OutboxServiceImpl outboxService;
+
+    @Mock
+    private BookingMetrics bookingMetrics;
 
     @InjectMocks
     private BookingServiceImpl service;
