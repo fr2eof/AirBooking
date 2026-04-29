@@ -19,6 +19,7 @@ import pet.airbooking.io.dto.event.BookingConfirmedEvent;
 import pet.airbooking.io.dto.event.BookingCreatedEvent;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
+import pet.airbooking.io.metrics.BookingMetrics;
 
 
 @Service
@@ -27,6 +28,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingJpaRepository repository;
     private final BookingMapper mapper;
     private final OutboxServiceImpl outboxService;
+    private final BookingMetrics metrics;
+
 
     @Override
     @Transactional
@@ -44,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
                         saved.getListingId()
                 )
         );
+        metrics.incrementCreated();
         return new CreateBookingResponse(saved.getId());
     }
 
@@ -75,6 +79,7 @@ public class BookingServiceImpl implements BookingService {
                 EventType.BOOKING_CONFIRMED,
                 new BookingConfirmedEvent(saved.getId())
         );
+        metrics.incrementConfirmed();
 
         return mapper.toDto(saved);
     }
@@ -92,6 +97,7 @@ public class BookingServiceImpl implements BookingService {
                 EventType.BOOKING_CANCELLED,
                 new BookingCancelledEvent(saved.getId())
         );
+        metrics.incrementCancelled();
 
         return mapper.toDto(saved);
     }

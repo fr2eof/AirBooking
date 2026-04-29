@@ -12,4 +12,5 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> 
     List<OutboxEvent> findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus status);
 
     void deleteByStatusAndCreatedAtBefore(OutboxStatus status, LocalDateTime time);
+    long countByStatus(OutboxStatus status);
 }
