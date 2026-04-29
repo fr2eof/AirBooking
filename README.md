@@ -11,6 +11,9 @@
 ![Kafka](https://img.shields.io/badge/Kafka-3.7-black)
 ![Liquibase](https://img.shields.io/badge/Liquibase-migrations-lightgrey)
 ![Testcontainers](https://img.shields.io/badge/Testcontainers-integration%20tests-blueviolet)
+![Redis](https://img.shields.io/badge/Redis-cache-red)
+![Micrometer](https://img.shields.io/badge/Micrometer-metrics-green)
+![Grafana](https://img.shields.io/badge/Grafana-observability-orange)
 
 ## Описание
 
