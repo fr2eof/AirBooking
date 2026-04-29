@@ -34,9 +34,6 @@
 
 ## Планы развития
 - Добавить ретраи из Outbox в Kafka
-- Добавить кэширование (Redis)
-- Добавить AOP-логи
-- Добавить метрики (Prometheus + Micrometer + Grafana)
 - Добавить CI/CD (pipeline)
 
 ## Запуск проекта
