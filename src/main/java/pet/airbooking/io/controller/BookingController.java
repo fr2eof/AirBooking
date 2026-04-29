@@ -1,5 +1,8 @@
 package pet.airbooking.io.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,18 +20,18 @@ public class BookingController {
     private final BookingService service;
 
     @PostMapping
-    public CreateBookingResponse create(@RequestBody CreateBookingRequest request) {
+    public CreateBookingResponse create(@Valid @RequestBody CreateBookingRequest request) {
         return service.create(request.getUserId(), request.getListingId());
     }
 
     @GetMapping("/{id}")
-    public BookingEntityDTO get(@PathVariable Long id) {
+    public BookingEntityDTO get(@PathVariable @NotNull @PositiveOrZero Long id) {
         return service.get(id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable @NotNull @PositiveOrZero Long id) {
         service.delete(id);
     }
 
@@ -38,12 +41,12 @@ public class BookingController {
     }
 
     @PostMapping("/{id}/confirm")
-    public BookingEntityDTO confirm(@PathVariable Long id) {
+    public BookingEntityDTO confirm(@PathVariable @NotNull @PositiveOrZero Long id) {
         return service.confirm(id);
     }
 
     @PostMapping("/{id}/cancel")
-    public BookingEntityDTO cancel(@PathVariable Long id) {
+    public BookingEntityDTO cancel(@PathVariable @NotNull @PositiveOrZero Long id) {
         return service.cancel(id);
     }
 
