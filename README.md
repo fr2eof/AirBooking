@@ -22,6 +22,9 @@
 
 Архитектура основана на подходе event-driven и outbox pattern для надёжной доставки событий
 
+Остальные микры:
+- [AirBooking Payment Service](https://github.com/fr2eof/AirBooking-Payment-Service)
+
 ## Основные возможности
 
 - Создание и управление бронированиями
