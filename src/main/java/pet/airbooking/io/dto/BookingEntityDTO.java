@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import pet.airbooking.core.model.BookingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,7 +16,7 @@ public class BookingEntityDTO {
 
     private Long id;
     private Long userId;
-    private Long listingId;
+    private BigDecimal amount;
     private BookingStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -23,11 +24,11 @@ public class BookingEntityDTO {
     public BookingEntityDTO() {
     }
 
-    public BookingEntityDTO(Long id, Long userId, Long listingId,
+    public BookingEntityDTO(Long id, Long userId, BigDecimal amount,
                             BookingStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
-        this.listingId = listingId;
+        this.amount = amount;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
