@@ -18,6 +18,7 @@ import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
 import pet.airbooking.io.metrics.BookingMetrics;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,23 +53,23 @@ class BookingServiceImplTest {
         void shouldCreateBooking_withPendingStatus() {
             // Given
             Long userId = 1L;
-            Long listingId = 2L;
+            BigDecimal amount = BigDecimal.valueOf(300);
 
-            BookingEntity savedEntity = new BookingEntity(userId, listingId);
+            BookingEntity savedEntity = new BookingEntity(userId, amount);
             savedEntity.setId(10L);
 
             given(repository.save(any())).willReturn(savedEntity);
 
             // When
             CreateBookingResponse actualResponse =
-                    service.create(userId, listingId);
+                    service.create(userId, amount);
 
             // Then
             assertThat(actualResponse.getBookingId()).isEqualTo(10L);
 
             verify(repository).save(argThat(entity ->
                     entity.getUserId().equals(userId) &&
-                            entity.getListingId().equals(listingId) &&
+                            entity.getAmount().equals(amount) &&
                             entity.getStatus() == BookingStatus.PENDING
             ));
 
@@ -82,16 +83,16 @@ class BookingServiceImplTest {
         void shouldReturnIdFromSavedEntity() {
             // Given
             Long userId = 1L;
-            Long listingId = 2L;
+            BigDecimal amount =  BigDecimal.valueOf(300);
 
-            BookingEntity savedEntity = new BookingEntity(userId, listingId);
+            BookingEntity savedEntity = new BookingEntity(userId, amount);
             savedEntity.setId(99L);
 
             given(repository.save(any())).willReturn(savedEntity);
 
             // When
             CreateBookingResponse actualResponse =
-                    service.create(userId, listingId);
+                    service.create(userId, amount);
 
             // Then
             assertThat(actualResponse.getBookingId()).isEqualTo(99L);
@@ -112,7 +113,7 @@ class BookingServiceImplTest {
             // Given
             Long id = 1L;
 
-            BookingEntity entity = new BookingEntity(1L, 2L);
+            BookingEntity entity = new BookingEntity(1L, BigDecimal.valueOf(300));
 
             BookingEntityDTO expectedDto = new BookingEntityDTO();
 
@@ -183,9 +184,9 @@ class BookingServiceImplTest {
             // Given
             Long id = 1L;
 
-            BookingEntity entity = spy(new BookingEntity(1L, 2L));
+            BookingEntity entity = spy(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
-            BookingEntity savedEntity = new BookingEntity(1L, 2L);
+            BookingEntity savedEntity = new BookingEntity(1L, BigDecimal.valueOf(300));
             savedEntity.setId(id);
 
             BookingEntityDTO expectedDto = new BookingEntityDTO();
@@ -231,9 +232,9 @@ class BookingServiceImplTest {
             // Given
             Long id = 1L;
 
-            BookingEntity entity = spy(new BookingEntity(1L, 2L));
+            BookingEntity entity = spy(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
-            BookingEntity savedEntity = new BookingEntity(1L, 2L);
+            BookingEntity savedEntity = new BookingEntity(1L, BigDecimal.valueOf(300));
             savedEntity.setId(id);
 
             BookingEntityDTO expectedDto = new BookingEntityDTO();

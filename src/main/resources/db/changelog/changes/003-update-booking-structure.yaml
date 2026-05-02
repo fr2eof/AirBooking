@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-update-booking-structure
+      author: you
+      changes:
+
+        - dropColumn:
+            tableName: booking
+            columnName: listing_id
+
+        - addColumn:
+            tableName: booking
+            columns:
+              - column:
+                  name: amount
+                  type: DECIMAL(19,2)
+                  defaultValueNumeric: "300"
+                  constraints:
+                    nullable: false

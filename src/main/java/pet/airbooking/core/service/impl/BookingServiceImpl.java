@@ -21,6 +21,8 @@ import pet.airbooking.io.dto.response.CreateBookingResponse;
 import pet.airbooking.io.mapper.BookingMapper;
 import pet.airbooking.io.metrics.BookingMetrics;
 
+import java.math.BigDecimal;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +35,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public CreateBookingResponse create(Long userId, Long listingId) {
-        BookingEntity entity = new BookingEntity(userId, listingId);
+    public CreateBookingResponse create(Long userId, BigDecimal amount) {
+        BookingEntity entity = new BookingEntity(userId, amount);
         entity.setStatus(BookingStatus.PENDING);
         BookingEntity saved = repository.save(entity);
 
@@ -44,7 +46,7 @@ public class BookingServiceImpl implements BookingService {
                 new BookingCreatedEvent(
                         saved.getId(),
                         saved.getUserId(),
-                        saved.getListingId()
+                        saved.getAmount() //todo replace with rest request announcement microservice
                 )
         );
         metrics.incrementCreated();

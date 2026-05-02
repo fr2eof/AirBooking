@@ -10,7 +10,7 @@ public class BookingMapper {
         return new BookingEntityDTO(
                 entity.getId(),
                 entity.getUserId(),
-                entity.getListingId(),
+                entity.getAmount(),
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
@@ -18,6 +18,6 @@ public class BookingMapper {
     }
 
     public BookingEntity toEntity(BookingEntityDTO dto) {
-        return new BookingEntity(dto.getUserId(), dto.getListingId(), dto.getStatus());
+        return new BookingEntity(dto.getUserId(), dto.getAmount(), dto.getStatus());
     }
 }
