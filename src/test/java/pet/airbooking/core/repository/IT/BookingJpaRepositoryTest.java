@@ -16,6 +16,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import pet.airbooking.core.entity.BookingEntity;
 import pet.airbooking.core.repository.BookingJpaRepository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ class BookingJpaRepositoryTest {
         @Test
         void shouldSaveBooking_withGeneratedId() {
             // Given
-            BookingEntity entity = new BookingEntity(1L, 2L);
+            BookingEntity entity = new BookingEntity(1L, BigDecimal.valueOf(300));
 
             // When
             BookingEntity actualSaved = repository.save(entity);
@@ -52,7 +53,7 @@ class BookingJpaRepositoryTest {
             // Then
             assertThat(actualSaved.getId()).isNotNull();
             assertThat(actualSaved.getUserId()).isEqualTo(1L);
-            assertThat(actualSaved.getListingId()).isEqualTo(2L);
+            assertThat(actualSaved.getAmount()).isEqualTo(BigDecimal.valueOf(300));
         }
     }
 
@@ -62,7 +63,7 @@ class BookingJpaRepositoryTest {
         @Test
         void shouldReturnBooking_whenExists() {
             // Given
-            BookingEntity entity = new BookingEntity(1L, 2L);
+            BookingEntity entity = new BookingEntity(1L, BigDecimal.valueOf(300));
             BookingEntity saved = repository.save(entity);
 
             // When
@@ -76,7 +77,7 @@ class BookingJpaRepositoryTest {
 
             assertThat(actual.getId()).isEqualTo(saved.getId());
             assertThat(actual.getUserId()).isEqualTo(1L);
-            assertThat(actual.getListingId()).isEqualTo(2L);
+            assertThat(actual.getAmount()).isEqualTo(BigDecimal.valueOf(300));
         }
 
         @Test
@@ -100,7 +101,7 @@ class BookingJpaRepositoryTest {
         void shouldReturnTrue_whenExists() {
             // Given
             BookingEntity saved =
-                    repository.save(new BookingEntity(1L, 2L));
+                    repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
             // When
             boolean actualExists =
@@ -131,7 +132,7 @@ class BookingJpaRepositoryTest {
         void shouldDeleteBooking() {
             // Given
             BookingEntity saved =
-                    repository.save(new BookingEntity(1L, 2L));
+                    repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
             Long id = saved.getId();
 
@@ -152,8 +153,8 @@ class BookingJpaRepositoryTest {
         @Test
         void shouldReturnPage() {
             // Given
-            repository.save(new BookingEntity(1L, 2L));
-            repository.save(new BookingEntity(3L, 4L));
+            repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
+            repository.save(new BookingEntity(3L, BigDecimal.valueOf(300)));
 
             Pageable pageable = PageRequest.of(0, 10);
 

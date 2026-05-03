@@ -9,6 +9,7 @@ import lombok.Setter;
 import pet.airbooking.core.exception.IllegalBookingStatusException;
 import pet.airbooking.core.model.BookingStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,7 +23,7 @@ public class BookingEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long userId;
-    private Long listingId;
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
@@ -32,16 +33,16 @@ public class BookingEntity {
     @Version
     private long version;
 
-    public BookingEntity(Long userId, Long listingId) {
+    public BookingEntity(Long userId, BigDecimal amount) {
         this.userId = userId;
-        this.listingId = listingId;
+        this.amount = amount;
         this.status = BookingStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
 
-    public BookingEntity(Long userId, Long listingId, BookingStatus status) {
+    public BookingEntity(Long userId, BigDecimal amount, BookingStatus status) {
         this.userId = userId;
-        this.listingId = listingId;
+        this.amount = amount;
         this.status = status;
     }
 

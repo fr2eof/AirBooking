@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
-@AllArgsConstructor
 @ToString
-public class BookingCreatedEvent {
+@AllArgsConstructor
+public class PaymentFailedEvent {
+    private Long id;
     private Long bookingId;
-    private Long userId;
-    private BigDecimal amount;
+    private String reason;
+
 }

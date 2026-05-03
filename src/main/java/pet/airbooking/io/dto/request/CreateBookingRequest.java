@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @ToString
@@ -15,7 +17,7 @@ public class CreateBookingRequest {
     @PositiveOrZero
     private Long userId;
 
-    @NotNull(message = "listingId must not be null")
+    @NotNull(message = "amount must not be null")
     @PositiveOrZero
-    private Long listingId;
+    private BigDecimal amount;
 }

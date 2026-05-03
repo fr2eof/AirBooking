@@ -37,13 +37,28 @@
 
 - Outbox pattern для надёжной доставки событий в Kafka
 - Асинхронная обработка событий
+- Event-Driven architecture
+- SAGA (Choreography)
 
 ## Планы развития
-- Добавить ретраи из Outbox в Kafka
-- Реализовать Payment Service
-- Подключить SAGA (хореография)
 - DLQ (dead letter events)
 
+## SAGA
+1. BookingService \
+   -> создаёт booking (PENDING) \
+   -> публикует booking.created
+
+2. PaymentService \
+   <- получает booking.created \
+   -> пытается провести оплату
+
+3. PaymentService \
+   -> если успех -> payment.completed \
+   -> если ошибка -> payment.failed
+
+4. BookingService \
+   <- получает payment.completed / payment.failed \
+   -> меняет статус booking
 
 ## Запуск проекта
 

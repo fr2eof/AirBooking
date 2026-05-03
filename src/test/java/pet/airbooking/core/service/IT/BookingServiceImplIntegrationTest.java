@@ -22,6 +22,8 @@ import pet.airbooking.core.service.BookingService;
 import pet.airbooking.io.dto.BookingEntityDTO;
 import pet.airbooking.io.dto.response.CreateBookingResponse;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -56,10 +58,10 @@ class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
         void shouldCreateBooking_andPersistOutboxEvent() {
 
             Long userId = 1L;
-            Long listingId = 2L;
+            BigDecimal amount = BigDecimal.valueOf(300);
 
             CreateBookingResponse response =
-                    service.create(userId, listingId);
+                    service.create(userId, amount);
 
             assertThat(response.getBookingId()).isNotNull();
 
@@ -85,7 +87,7 @@ class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
         @Test
         void shouldReturnBookingDto() {
             // Given
-            BookingEntity entity = new BookingEntity(1L, 2L);
+            BookingEntity entity = new BookingEntity(1L, BigDecimal.valueOf(300));
             entity.setStatus(BookingStatus.PENDING);
 
             BookingEntity saved = repository.save(entity);
@@ -107,7 +109,7 @@ class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
         void shouldDeleteBooking_andWriteOutboxEvent() {
 
             BookingEntity saved =
-                    repository.save(new BookingEntity(1L, 2L));
+                    repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
             Long id = saved.getId();
 
@@ -141,7 +143,7 @@ class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
         void shouldConfirmBooking_andWriteOutboxEvent() {
 
             BookingEntity saved =
-                    repository.save(new BookingEntity(1L, 2L));
+                    repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
             service.confirm(saved.getId());
 
@@ -166,7 +168,7 @@ class BookingServiceImplIntegrationTest extends AbstractIntegrationTest {
         void shouldCancelBooking_andWriteOutboxEvent() {
 
             BookingEntity saved =
-                    repository.save(new BookingEntity(1L, 2L));
+                    repository.save(new BookingEntity(1L, BigDecimal.valueOf(300)));
 
             service.cancel(saved.getId());
 
