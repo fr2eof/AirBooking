@@ -7,6 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import pet.airbooking.core.service.BookingService;
 import pet.airbooking.io.dto.event.PaymentCompletedEvent;
+import pet.airbooking.io.messaging.producer.DlqProducer;
 
 @Component
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class PaymentCompletedConsumer {
 
     private final ObjectMapper objectMapper;
     private final BookingService bookingService;
+    private final DlqProducer dlqProducer;
 
     @KafkaListener(
             topics = "payment.completed",
@@ -31,6 +33,7 @@ public class PaymentCompletedConsumer {
 
         } catch (Exception e) {
             log.error("Failed to process payment.completed: {}", message, e);
+            dlqProducer.send("payment.completed.dlq", message);
         }
     }
 }
