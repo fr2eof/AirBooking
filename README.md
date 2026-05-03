@@ -39,9 +39,10 @@
 - Асинхронная обработка событий
 - Event-Driven architecture
 - SAGA (Choreography)
+- DLQ (Dead Letter Queue)
 
 ## Планы развития
-- DLQ (dead letter events)
+- Микросервис цен на бронирования 
 
 ## SAGA
 1. BookingService \
