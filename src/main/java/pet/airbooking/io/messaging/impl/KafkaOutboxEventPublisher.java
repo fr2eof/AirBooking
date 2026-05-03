@@ -1,5 +1,6 @@
 package pet.airbooking.io.messaging.impl;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
     private final KafkaProducerService kafkaProducerService;
 
     @Override
+    @Retry(name = "kafkaPublish", fallbackMethod = "fallback")
     public void publish(OutboxEvent event) {
 
         String topic = resolveTopic(event.getEventType());
@@ -25,27 +27,16 @@ public class KafkaOutboxEventPublisher implements OutboxEventPublisher {
                 event.getAggregateId(),
                 topic);
 
-        try {
-            kafkaProducerService.send(
-                    topic,
-                    String.valueOf(event.getAggregateId()),
-                    event.getPayload()
-            );
+        kafkaProducerService.send(
+                topic,
+                String.valueOf(event.getAggregateId()),
+                event.getPayload()
+        );
+    }
 
-            log.info("Outbox event published successfully type={} aggregateId={}",
-                    event.getEventType(),
-                    event.getAggregateId());
-
-        } catch (Exception ex) {
-
-            log.error("Failed to publish outbox event type={} aggregateId={} topic={}",
-                    event.getEventType(),
-                    event.getAggregateId(),
-                    topic,
-                    ex);
-
-            throw ex;
-        }
+    private void fallback(OutboxEvent event, Throwable ex) {
+        log.error("FINAL FAIL sending event id={}", event.getId(), ex);
+        throw new RuntimeException(ex);
     }
 
     private String resolveTopic(EventType type) {
